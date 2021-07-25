@@ -14,7 +14,14 @@ from ..mixins.metaclass import MetaClass
 from ..utils.enums import RaffleComponents
 from ..utils.exceptions import RaffleError
 from ..utils.formatting import cross, tick
-from ..utils.helpers import cleanup_code, format_traceback, format_underscored_text, getstrftime, number_suffix, validator
+from ..utils.helpers import (
+    cleanup_code,
+    format_traceback,
+    format_underscored_text,
+    getstrftime,
+    number_suffix,
+    validator,
+)
 from ..utils.parser import RaffleManager
 
 _ = Translator("Raffle", __file__)
@@ -137,7 +144,9 @@ class BuilderCommands(RaffleMixin, metaclass=MetaClass):
             channel = check.result
 
             if not await ctx.embed_requested():
-                await ctx.send(_("I need to be able to send messages to {}").format(channel.mention))
+                await ctx.send(
+                    _("I need to be able to send messages to {}").format(channel.mention)
+                )
                 return
             if not channel.permissions_for(ctx.me).send_messages:
                 await ctx.send(_("I am unable to send messages to this channel."))
@@ -148,30 +157,39 @@ class BuilderCommands(RaffleMixin, metaclass=MetaClass):
 
             embed = discord.Embed(
                 title=f"{rafflename} raffle",
-                description=conditions["description"] or "No description was provided for this raffle.",
+                description=conditions["description"]
+                or "No description was provided for this raffle.",
                 color=await ctx.embed_colour(),
             )
-            
+
             filtered_conditions = []
             blocked_conditions = ("description", "reaction_emoji")
             for k, v in list(filter(lambda x: bool(x[1]), conditions.items())):
                 if k in blocked_conditions:
                     continue
                 if "user" in k:
-                    users = "\n" + "\n".join(f"- {v}" for v in [ctx.guild.get_member(u).name for u in v])
+                    users = "\n" + "\n".join(
+                        f"- {v}" for v in [ctx.guild.get_member(u).name for u in v]
+                    )
                     filtered_conditions.append((k, users))
                 if "role" in k:
-                    roles = "\n" + "\n".join(f"- {v}" for v in [ctx.guild.get_role(r).name for r in v])
+                    roles = "\n" + "\n".join(
+                        f"- {v}" for v in [ctx.guild.get_role(r).name for r in v]
+                    )
                     filtered_conditions.append((k, roles))
                 elif isinstance(v, list):
                     filtered_conditions.append((k, "\n" + "\n".join(f"- {v}" for v in v)))
                 else:
                     filtered_conditions.append((k, v))
-                
 
             embed.add_field(
                 name="Conditions",
-                value=box("\n".join(f"{format_underscored_text(k)}: {v}" for k, v in filtered_conditions), lang="yaml")
+                value=box(
+                    "\n".join(
+                        f"{format_underscored_text(k)}: {v}" for k, v in filtered_conditions
+                    ),
+                    lang="yaml",
+                ),
             )
 
             msg = await channel.send(embed=embed)
