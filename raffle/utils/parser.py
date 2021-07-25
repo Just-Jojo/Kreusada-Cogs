@@ -154,7 +154,7 @@ class RaffleManager(object):
                     raise RaffleSyntaxError(
                         f'(badges_needed_to_enter) "{b}" must be a Discord badge wrapped in quotation marks'
                     )
-                if not b in VALID_USER_BADGES:
+                if not b.lower() in VALID_USER_BADGES:
                     raise InvalidArgument(
                         f'(badges_needed_to_enter) "{b}" is not a recognized Discord badge'
                     )

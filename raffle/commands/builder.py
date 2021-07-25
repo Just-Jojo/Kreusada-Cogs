@@ -12,9 +12,9 @@ from redbot.core.utils.predicates import MessagePredicate
 from ..mixins.abc import RaffleMixin
 from ..mixins.metaclass import MetaClass
 from ..utils.enums import RaffleComponents
-from ..utils.exceptions import DeniedUserEntryError, RaffleError
+from ..utils.exceptions import RaffleError
 from ..utils.formatting import cross, tick
-from ..utils.helpers import cleanup_code, format_traceback, getstrftime, number_suffix, validator
+from ..utils.helpers import cleanup_code, format_traceback, format_underscored_text, getstrftime, number_suffix, validator
 from ..utils.parser import RaffleManager
 
 _ = Translator("Raffle", __file__)
@@ -134,26 +134,56 @@ class BuilderCommands(RaffleMixin, metaclass=MetaClass):
                 await ctx.send(_("You took too long to respond."))
                 return
 
+            channel = check.result
+
+            if not await ctx.embed_requested():
+                await ctx.send(_("I need to be able to send messages to {}").format(channel.mention))
+                return
+            if not channel.permissions_for(ctx.me).send_messages:
+                await ctx.send(_("I am unable to send messages to this channel."))
+                return
+            if not channel.permissions_for(ctx.me).add_reactions:
+                await ctx.send(_("I am unable to add reactions to this channel."))
+                return
+
             embed = discord.Embed(
                 title=f"{rafflename} raffle",
-                description=conditions["description"],
+                description=conditions["description"] or "No description was provided for this raffle.",
                 color=await ctx.embed_colour(),
             )
+            
+            filtered_conditions = []
+            blocked_conditions = ("description", "reaction_emoji")
+            for k, v in list(filter(lambda x: bool(x[1]), conditions.items())):
+                if k in blocked_conditions:
+                    continue
+                if "user" in k:
+                    users = "\n" + "\n".join(f"- {v}" for v in [ctx.guild.get_member(u).name for u in v])
+                    filtered_conditions.append((k, users))
+                if "role" in k:
+                    roles = "\n" + "\n".join(f"- {v}" for v in [ctx.guild.get_role(r).name for r in v])
+                    filtered_conditions.append((k, roles))
+                elif isinstance(v, list):
+                    filtered_conditions.append((k, "\n" + "\n".join(f"- {v}" for v in v)))
+                else:
+                    filtered_conditions.append((k, v))
+                
 
-            try:
-                msg = await check.result.send(embed=embed)
-            except discord.HTTPException:
-                await ctx.send("I am unable to send messages to this channel.")
-                return
+            embed.add_field(
+                name="Conditions",
+                value=box("\n".join(f"{format_underscored_text(k)}: {v}" for k, v in filtered_conditions), lang="yaml")
+            )
+
+            msg = await channel.send(embed=embed)
             await msg.add_reaction(conditions["reaction_emoji"])
 
             data["external-settings"] = {"type": "reaction", "msgid": msg.id}
 
             raffle[rafflename] = data
 
-        kwargs = {"content": tick(_("Raffle created with the name `{}`.".format(rafflename)))}
-        if ctx.channel == check.result:
-            kwargs["delete_after"] = 3
+            kwargs = {"content": tick(_("Raffle created with the name `{}`.".format(rafflename)))}
+            if ctx.channel == check.result:
+                kwargs["delete_after"] = 3
 
         await ctx.send(**kwargs)
         await self.clean_guild_raffles(ctx)

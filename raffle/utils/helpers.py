@@ -13,7 +13,7 @@ from yaml.parser import MarkedYAMLError
 from .checks import now
 from .enums import RaffleEndMessageComponents, RaffleJoinMessageComponents
 from .exceptions import InvalidArgument, RaffleError
-from .formatting import cross, curl, formatenum
+from .formatting import cross, curl, formatenum, tick
 from .safety import RaffleSafeMember
 
 _ = Translator("Raffle", __file__)
@@ -61,12 +61,12 @@ def yield_sectors(l, n):
 
 
 def has_badge(badge: str, author: discord.Member):
-    badge_data = {k: v for k, v in list(author.public_flags)}
+    badge_data = {k.lower(): v for k, v in list(author.public_flags)}
     return badge_data[badge]
 
 
 def format_underscored_text(text: str):
-    return text.replace("_", " ").title()
+    return text.replace("_", " ").capitalize()
 
 
 def revert_underscored_text(text: str):

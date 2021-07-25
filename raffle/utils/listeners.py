@@ -50,7 +50,7 @@ class Listeners(RaffleMixin, metaclass=MetaClass):
             try:
                 RaffleManager.check_user_entry(user, raffle_config[raffle])
             except DeniedUserEntryError as e:
-                kwargs["content"] = str(e).lower()
+                kwargs["content"] = str(e)
                 await message.remove_reaction(raffle_config[raffle]["reaction_emoji"], user)
             else:
                 kwargs["content"] = "You have been entered into the raffle!"
@@ -61,7 +61,7 @@ class Listeners(RaffleMixin, metaclass=MetaClass):
                     await user.send(**kwargs)
                 except discord.HTTPException:
                     kwargs["delete_after"] = 2.5
-                    kwargs["content"] = f"{user.mention} " + kwargs["content"]
+                    kwargs["content"] = f"{user.mention} " + kwargs["content"].lower()
                     await channel.send(**kwargs)
 
     @commands.Cog.listener()
