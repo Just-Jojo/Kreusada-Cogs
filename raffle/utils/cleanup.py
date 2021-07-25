@@ -2,6 +2,7 @@ from redbot.core.commands import Context
 
 from ..log import log
 from ..mixins.abc import RaffleMixin
+from ..version_handler import VersionHandler
 
 
 class CleanupHelpers(RaffleMixin):
@@ -60,6 +61,9 @@ class CleanupHelpers(RaffleMixin):
             if not gobj:
                 continue
             raffles = all_guilds[g]["raffles"]
+            if VersionHandler.__version__ >= (2, 0, 0):
+                if not raffles.get("external-settings", None):
+                    raffles["external_settings"] = {"type": "command"}
             for r in raffles.keys():
                 IDS = {}
                 if raffles[r] and "roles" in r:
