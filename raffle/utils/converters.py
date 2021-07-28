@@ -3,6 +3,7 @@ from redbot.core.commands import BadArgument, Context, Converter
 __all__ = (
     "RaffleFactoryConverter",
     "RaffleExists",
+    "RaffleNameConverter",
 )
 
 
@@ -31,5 +32,18 @@ class RaffleExists(Converter):
             if not argument in raffles.keys():
                 raise BadArgument(
                     "There is not an ongoing raffle with the name `{}`.".format(argument)
+                )
+        return argument
+
+class RaffleNameConverter(Converter):
+    """A converter for simple raffles."""
+    
+    async def convert(self, ctx: Context, argument: str):
+        for char in argument:
+            if char == "_":
+                continue
+            if not char.isalpha():
+                raise BadArgument(
+                    "Please provide an alphabetic name. Underscores are allowed; no spaces."
                 )
         return argument

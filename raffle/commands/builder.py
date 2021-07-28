@@ -11,6 +11,7 @@ from redbot.core.utils.predicates import MessagePredicate
 
 from ..mixins.abc import RaffleMixin
 from ..mixins.metaclass import MetaClass
+from ..utils.converters import RaffleNameConverter
 from ..utils.enums import RaffleComponents
 from ..utils.exceptions import RaffleError
 from ..utils.formatting import cross, tick
@@ -294,7 +295,7 @@ class BuilderCommands(RaffleMixin, metaclass=MetaClass):
             await self.clean_guild_raffles(ctx)
 
     @create.command()
-    async def simple(self, ctx, raffle_name: str, *, description: Optional[str] = None):
+    async def simple(self, ctx, raffle_name: RaffleNameConverter, *, description: Optional[str] = None):
         """Create a simple arguments with just a name and description.
 
         **Arguments:**
