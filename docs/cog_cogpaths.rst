@@ -62,6 +62,7 @@ path, if the cog stores data.
 **Arguments**
 
 * ``<cog>``: The cog to get the paths for.
+
 ---------------
 Receive Support
 ---------------

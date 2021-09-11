@@ -169,7 +169,7 @@ Set the ping message sent when a user runs the ping command.
 - ``{author.mention}``
 - ``{author.id}``
 - ``{author.discriminator}``
-`` ``{author.name_and_discriminator}``
+- ``{author.name_and_discriminator}``
 - ``{latency}``
 
 .. _pingoverride-command-pingset-reply:
